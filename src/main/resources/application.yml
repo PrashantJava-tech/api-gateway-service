@@ -1,13 +1,46 @@
-spring:
-  application:
-    name: API_GATEWAY_SERVICE
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:1111/eureka
-  instance:
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${server.port}}
-
 server:
   port: 3333
+
+spring:
+  application:
+    name: API-GATEWAY-SERVICE
+  cloud:
+    gateway:
+      routes:
+        - id: ACCOUNT-SERVICE
+          uri: lb://ACCOUNT-SERVICE     #-----lb = load balancing
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: ACCOUNT-SERVICE
+                fallbackuri: forward:/accountServiceFallback
+        - id: PRODUCT-SERVICE
+          uri: lb://PRODUCT-SERVICE     #-----lb = load balancing
+          predicates:
+            - Path=/products/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: PRODUCT-SERVICE
+                fallbackuri: forward:/productServiceFallback
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+  #Turn on hystrix indicator
+#feign:
+#  hystrix:
+#    enabled: true
+  #For dashboard monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+
