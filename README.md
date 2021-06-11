@@ -8,27 +8,9 @@ It uses below annotations.
 @EnableHystrix
 
 And its application.yml file contains below piece of code.
---------------------
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: ACCOUNT-SERVICE
-          uri: lb://ACCOUNT-SERVICE     #-----lb = load balancing
-          predicates:
-            - Path=/accounts/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: ACCOUNT-SERVICE
-                fallbackuri: forward:/accountServiceFallback
-        - id: PRODUCT-SERVICE
-          uri: lb://PRODUCT-SERVICE     #-----lb = load balancing
-          predicates:
-            - Path=/products/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: PRODUCT-SERVICE
-                fallbackuri: forward:/productServiceFallback
+
+predicates:
+filters:
+  - name: CircuitBreaker
+  fallbackuri: forward:/accountServiceFallback
 
